@@ -29,6 +29,17 @@ def getCompletedFilename(filename):
     # server?                                          #
     ####################################################
 
+    completion_time = (datetime.now() - job_start_time.get(filename)).total_seconds()
+    server_capacity = int(job_sizes.get(filename) / completion_time)
+
+    server_index = job_to_server.get(filename)
+
+    if server_capacity != server_capacities[server_index]:
+        print("!!! Updating server capacity of server {}: capacity {} !!!".format(server_index, server_capacity))
+        server_capacities[server_index] = server_capacity
+    
+    server_occupied[server_index] = False
+
     # In this example. just print message
     print(f"[JobScheduler] Filename {filename} is finished.")
 
@@ -47,9 +58,35 @@ def assignServerToRequest(servernames, request):
 
     request_name = request.split(",")[0]
     request_size = request.split(",")[1]
+    job_sizes.update({request_name: int(request_size)})
 
-    # Example. just assign the first server
-    server_to_send = servernames[0]
+    print("Filename: {}, Size: {}".format(request_name, request_size))
+
+    server_to_send = None
+    max_capacity = 0
+    max_capacity_server_index = 0
+
+    for index in range(0, len(servernames)):
+        
+        # compute server w largest cap too
+        if server_capacities[index] > max_capacity:
+            max_capacity = server_capacities[index]
+            max_capacity_server_index = index
+
+        # assign to server as long as not busy
+        if not server_occupied[index]:
+            server_to_send = servernames[index]
+            job_to_server.update({request_name: index})
+            job_start_time.update({request_name: datetime.now()})
+            server_occupied[index] = True
+            break
+
+    # if no assigned server, gib to server with largest cap
+    if server_to_send is None:
+        server_to_send = servernames[max_capacity_server_index]
+        job_to_server.update({request_name: max_capacity_server_index})
+        job_start_time.update({request_name: datetime.now()})
+        server_occupied[index] = True
 
     ####################################################
 
@@ -102,6 +139,14 @@ if __name__ == "__main__":
     # receive preliminary information: servernames (can infer the number of servers)
     binaryServernames = serverSocket.recv(4096)
     servernames = parseServernames(binaryServernames)
+
+    # initialize variables
+    job_sizes = {}
+    server_occupied = [ False for servername in servernames ]
+    server_capacities = [ 0 for servername in servernames ]
+    job_to_server = {}
+    job_start_time = {}
+
     print(f"Servernames: {servernames}")
 
     currSeconds = -1
