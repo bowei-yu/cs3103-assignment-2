@@ -4,11 +4,9 @@ import sys
 import argparse
 import signal
 
-
 server_list = []
 initial_list = []
 server_request_times = {}
-J = []
 
 # KeyboardInterrupt handler
 def sigint_handler(signal, frame):
@@ -89,7 +87,7 @@ def assignServerToRequest(servernames, request):
     # server_to_send = servernames[0]
 
     # Get variables
-    global server_list, server_request_times, start_list, J
+    global server_list, server_request_times, start_list
 
     # If servers are not initialized, initialize using initial list first (ie push out jobs and spread it across to all servers)
     if initial_list:
