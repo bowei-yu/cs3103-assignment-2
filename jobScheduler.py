@@ -3,6 +3,10 @@ import socket
 import sys
 import argparse
 import signal
+import random
+
+available_servers = []
+occupied_servers = {}
 
 # KeyboardInterrupt handler
 def sigint_handler(signal, frame):
@@ -17,7 +21,6 @@ def sendPrintAll(serverSocket):
 def parseServernames(binaryServernames):
     return binaryServernames.decode().split(',')[:-1]
 
-
 # get the completed file's name, what you want to do?
 def getCompletedFilename(filename):
     ####################################################
@@ -28,6 +31,9 @@ def getCompletedFilename(filename):
     # or track the number of concurrent files for each #
     # server?                                          #
     ####################################################
+    server_freed = occupied_servers.get(filename)
+    del occupied_servers[filename]
+    available_servers.insert(0, server_freed)
 
     # In this example. just print message
     print(f"[JobScheduler] Filename {filename} is finished.")
@@ -44,12 +50,21 @@ def assignServerToRequest(servernames, request):
     # to assign this request? You can make decision.   #
     # You can use a global variables or add more       #
     # arguments.                                       #
+    ####################################################
 
+    # request_size can be known / unknown. If unknown, -1 is returned
     request_name = request.split(",")[0]
     request_size = request.split(",")[1]
 
     # Example. just assign the first server
-    server_to_send = servernames[0]
+    global available_servers
+    if available_servers:
+        server_to_send = available_servers.pop(0)
+    else:
+        available_servers = servernames.copy()
+        server_to_send = available_servers.pop(0)
+
+    occupied_servers[request_name] = server_to_send
 
     ####################################################
 
@@ -73,6 +88,7 @@ def parseThenSendRequest(clientData, serverSocket, servernames):
             getCompletedFilename(filename)  
         else:
             # if requests, add "servername" front of the pairs -> "servername, filename, jobsize"
+            # assignServerToRequest returns "servername, filename, jobsize"
             sendToServers = sendToServers + \
                 assignServerToRequest(servernames, request)  
 
@@ -103,6 +119,7 @@ if __name__ == "__main__":
     binaryServernames = serverSocket.recv(4096)
     servernames = parseServernames(binaryServernames)
     print(f"Servernames: {servernames}")
+    available_servers = servernames.copy()
 
     currSeconds = -1
     now = datetime.now()
@@ -111,8 +128,7 @@ if __name__ == "__main__":
             # receive the completed filenames from server
             completeFilenames = serverSocket.recv(4096)
             if completeFilenames != b"":
-                parseThenSendRequest(
-                    completeFilenames, serverSocket, servernames)
+                parseThenSendRequest(completeFilenames, serverSocket, servernames)
         except socket.timeout:
             # IMPORTANT: catch timeout exception, DO NOT REMOVE
             pass
