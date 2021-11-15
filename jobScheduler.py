@@ -65,8 +65,8 @@ def getCompletedFilename(filename):
     server_list[position][2] = response_time
     server_list.sort()
 
-    print('Completed')
-    print(server_list)
+    # print('Completed')
+    # print(server_list)
 
     # # Adjust connection weight (cW) = Number of Active Connections x (10000 / Set Weight (sW))
     # # Adjust time weight (cW) = Response Time x (10000 / Set Weight (sW))
@@ -135,10 +135,10 @@ def assignServerToRequest(servernames, request):
         else:
             server_list[idx][1] = active_connections
 
-    print('Initial list')
-    print(initial_list)
-    print('Sent')
-    print(server_list)
+    # print('Initial list')
+    # print(initial_list)
+    # print('Sent')
+    # print(server_list)
 
     # Record time of request to server
     server_request_times[request_name] = [server_name, datetime.now()]
