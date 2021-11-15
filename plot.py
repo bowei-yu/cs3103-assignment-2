@@ -37,6 +37,6 @@ if __name__ == "__main__":
                                         round(2 * (map_ts_complete[filename] - map_ts_begin[filename]), 1)/2.0])
     print(f"list_tsdiff: {list_tsdiff}")
     plt.hist([v[1] for v in list_tsdiff])
-    plt.savefig('histogram.png')
+    plt.savefig('histogram6-remove-prints.png')
 
     print("\n\n*** Average completion time : {0:2.4f}".format(np.mean([v[1] for v in list_tsdiff])))
