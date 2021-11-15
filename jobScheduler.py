@@ -3,6 +3,7 @@ import socket
 import sys
 import argparse
 import signal
+import heapq
 
 server_list = []
 initial_list = []
@@ -43,7 +44,7 @@ def getCompletedFilename(filename):
     four_tuple = None
     position = None
     for idx, val in enumerate(server_list):
-        if server_name in val:
+        if server_name == val[3]:
             four_tuple = val
             position = idx
             break
@@ -56,7 +57,7 @@ def getCompletedFilename(filename):
     active_connections = active_connections - 1
 
     N = response_time * active_connections
-    weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
+    weighted_response_time = N * (10000 / ((len(server_list) - idx)))
 
     # Update four_tuple in server_list and sort
     server_list[position][0] = weighted_response_time
@@ -98,13 +99,17 @@ def assignServerToRequest(servernames, request):
     # server_to_send = servernames[0]
 
     # Get variables
-    global server_list, server_request_times, start_list
+    global server_list, server_request_times, initial_list
 
     # If servers are not initialized, initialize using initial list first (ie push out jobs and spread it across to all servers)
     if initial_list:
+        is_initial_list = True
+        idx = len(server_list) - len(initial_list)
         four_tuple = initial_list.pop(0)
     else:
-        four_tuple = server_list[0]
+        is_initial_list = False
+        idx = 0
+        four_tuple = heapq.heappop(server_list)
 
     N = four_tuple[0]
     active_connections = four_tuple[1]
@@ -113,18 +118,22 @@ def assignServerToRequest(servernames, request):
 
     # Increment active connections
     server_to_send = server_name
-    active_connections = active_connections + 1        
+    active_connections = active_connections + 1
 
-    for idx, val in enumerate(server_list):
-        if server_name in val:
+    if response_time != 0:
+        N = response_time * active_connections
+         # index is always 0
+        weighted_response_time = N * (10000 / (len(servernames) - idx))
+        if not is_initial_list:
+            heapq.heappush(server_list, [weighted_response_time, active_connections, response_time, server_name])
+        else:
             server_list[idx][1] = active_connections
-            # Prevents bug where N = 0 and only 1 server keeps getting assigned jobs
-            if response_time != 0:
-                N = response_time * active_connections
-                weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
-                server_list[idx][0] = weighted_response_time
-            break
-    server_list.sort()
+    else:
+        # update active connections
+        if not is_initial_list:
+            heapq.heappush(server_list, [N, active_connections, response_time, server_name])
+        else:
+            server_list[idx][1] = active_connections
 
     print('Initial list')
     print(initial_list)
@@ -192,6 +201,8 @@ if __name__ == "__main__":
         N = 100000
         server_list.append([N, active_connections, response_time, i])
     print(server_list)
+    heapq.heapify(server_list)
+
     # For initializing all servers
     initial_list = server_list.copy()
 
