@@ -3,10 +3,10 @@
 
 </br>
 
-# Instructions to run job scheduler
+# Instructions to run the job scheduler
 ### 1. Use a linux environment with Python 3 and C installed (eg xcne1.comp.nus.edu.sg)
 ### 2. Start the server-client simulator on a terminal using:
-`./server_client -port <port number> -prob 100`
+`./server_client -port <port number> -prob <knowledge probability>`
 ### 3. Launch the job scheduler by running on another terminal:
 `python3 jobScheduler.py -port <port number>`
 #### Ensure that the port numbers for both programs are the same.
