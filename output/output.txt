@@ -1,0 +1,7 @@
+Set 0 | Probability 0: *** Average completion time : 1.9717
+Set 1 | Probability 0: *** Average completion time : 9.2846
+Set 2 | Probability 0: *** Average completion time : 8.3883
+Set 3 | Probability 0: *** Average completion time : 14.2519
+Set 4 | Probability 0: *** Average completion time : 50.8959
+Set 5 | Probability 0: *** Average completion time : 55.5537
+Set 6 | Probability 0: *** Average completion time : 66.1361

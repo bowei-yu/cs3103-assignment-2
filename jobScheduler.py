@@ -54,8 +54,11 @@ def getCompletedFilename(filename):
     response_time = four_tuple[2]
     response_time = time_taken
     active_connections = active_connections - 1
-
-    N = response_time * active_connections
+    
+    if active_connections == 0:
+        N = response_time
+    else:
+        N = response_time * active_connections
     weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
 
     # Update four_tuple in server_list and sort
