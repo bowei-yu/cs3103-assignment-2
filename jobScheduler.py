@@ -98,7 +98,7 @@ def assignServerToRequest(servernames, request):
     # server_to_send = servernames[0]
 
     # Get variables
-    global server_list, server_request_times, start_list
+    global server_list, server_request_times, initial_list
 
     # If servers are not initialized, initialize using initial list first (ie push out jobs and spread it across to all servers)
     if initial_list:
