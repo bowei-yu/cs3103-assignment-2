@@ -1,6 +1,8 @@
 # CS3103 Assignment 2 - Job Scheduling
 ### Done by: Wong Jun Long (A021889W) and Yu Bowei (A0205496Y)
 
+</br>
+
 # Instructions to run job scheduler
 ### 1. Use a linux environment with Python 3 and C installed (eg xcne1.comp.nus.edu.sg)
 ### 2. Start the server-client simulator on a terminal using:
