@@ -36,6 +36,7 @@ def getCompletedFilename(filename):
     global server_list, server_request_times, num_occupied, job_queue
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
+    request_size = server_request_times[filename][2]
     print(server_name)
 
     # get response time
@@ -57,7 +58,11 @@ def getCompletedFilename(filename):
     response_time = time_taken
     active_connections = active_connections - 1
 
-    N = response_time * active_connections
+    if (request_size != -1):
+        N = (response_time / request_size) * active_connections
+    else:
+        N = response_time * active_connections
+
     weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
 
     # Update four_tuple in server_list and sort
@@ -70,7 +75,7 @@ def getCompletedFilename(filename):
         #scheduled_request = scheduleJobToServer(server_name, job_queue.pop(0))
         #return scheduled_request
     #else:
-    
+
     print('Completed')
     print(server_list)
 
@@ -99,7 +104,7 @@ def assignServerToRequest(servernames, request):
     # arguments.                                       #
     ####################################################
     request_name = request.split(",")[0]
-    request_size = request.split(",")[1]
+    request_size = float(request.split(",")[1])
 
     # # Example. just assign the first server
     # server_to_send = servernames[0]
@@ -128,8 +133,12 @@ def assignServerToRequest(servernames, request):
                 server_list[idx][1] = active_connections
                 # Prevents bug where N = 0 and only 1 server keeps getting assigned jobs
                 if response_time != 0:
-                    N = response_time * active_connections
-                    weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
+                    if (request_size != -1):
+                        N = (response_time / request_size) * active_connections
+                        weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
+                    else:
+                        N = response_time * active_connections
+                        weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
                     server_list[idx][0] = weighted_response_time
                 break
         server_list.sort()
@@ -144,7 +153,7 @@ def assignServerToRequest(servernames, request):
 
     # Schedule the job
         scheduled_request = scheduleJobToServer(server_to_send, request)
-        server_request_times[request_name] = [server_name, datetime.now()]
+        server_request_times[request_name] = [server_name, datetime.now(), request_size]
         return scheduled_request
     else:
         # queue and send later
