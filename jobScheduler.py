@@ -7,6 +7,7 @@ import signal
 server_list = []
 initial_list = []
 server_request_times = {}
+job_queue = []
 
 # KeyboardInterrupt handler
 def sigint_handler(signal, frame):
@@ -32,7 +33,7 @@ def getCompletedFilename(filename):
     # or track the number of concurrent files for each #
     # server?                                          #
     ####################################################
-    global server_list, server_request_times
+    global server_list, server_request_times, num_occupied, job_queue
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
 
@@ -64,6 +65,10 @@ def getCompletedFilename(filename):
     server_list[position][2] = response_time
     server_list.sort()
 
+    #if len(job_queue) > 0:
+    #    scheduled_request = scheduleJobToServer(server_name, job_queue.pop(0))
+    #else:
+    
     print('Completed')
     print(server_list)
 
@@ -98,7 +103,7 @@ def assignServerToRequest(servernames, request):
     # server_to_send = servernames[0]
 
     # Get variables
-    global server_list, server_request_times, initial_list
+    global server_list, server_request_times, initial_list, num_occupied, job_queue
 
     # If servers are not initialized, initialize using initial list first (ie push out jobs and spread it across to all servers)
     if initial_list:
@@ -115,28 +120,34 @@ def assignServerToRequest(servernames, request):
     server_to_send = server_name
     active_connections = active_connections + 1        
 
-    for idx, val in enumerate(server_list):
-        if server_name in val:
-            server_list[idx][1] = active_connections
-            # Prevents bug where N = 0 and only 1 server keeps getting assigned jobs
-            if response_time != 0:
-                N = response_time * active_connections
-                weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
-                server_list[idx][0] = weighted_response_time
-            break
-    server_list.sort()
+    if active_connections <= 1:
+        for idx, val in enumerate(server_list):
+            if server_name in val:
+                server_list[idx][1] = active_connections
+                # Prevents bug where N = 0 and only 1 server keeps getting assigned jobs
+                if response_time != 0:
+                    N = response_time * active_connections
+                    weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
+                    server_list[idx][0] = weighted_response_time
+                break
+        server_list.sort()
 
-    print('Initial list')
-    print(initial_list)
-    print('Sent')
-    print(server_list)
+        print('Initial list')
+        print(initial_list)
+        print('Sent')
+        print(server_list)
 
     # Record time of request to server
-    server_request_times[request_name] = [server_name, datetime.now()]
+    # server_request_times[request_name] = [server_name, datetime.now()]
 
     # Schedule the job
-    scheduled_request = scheduleJobToServer(server_to_send, request)
-    return scheduled_request
+        scheduled_request = scheduleJobToServer(server_to_send, request)
+        server_request_times[request_name] = [server_name, datetime.now()]
+        return scheduled_request
+    else:
+        # queue and send later
+        job_queue.append(request)
+        return None
 
 
 def parseThenSendRequest(clientData, serverSocket, servernames):
@@ -151,11 +162,17 @@ def parseThenSendRequest(clientData, serverSocket, servernames):
         if request[0] == "F":
             # if completed filenames, get the message with leading alphabet "F"
             filename = request.replace("F", "")
-            getCompletedFilename(filename)  
+            getCompletedFilename(filename)
+            if len(job_queue) > 0:
+                request = job_queue.pop()
+                sendToServers = sendToServers + \
+                        assignServerToRequest(servernames, request)
         else:
             # if requests, add "servername" front of the pairs -> "servername, filename, jobsize"
-            sendToServers = sendToServers + \
-                assignServerToRequest(servernames, request)  
+            assigned_request = assignServerToRequest(servernames, request)
+            if assigned_request is not None:
+                sendToServers = sendToServers + \
+                        assignServerToRequest(servernames, request)
 
     # send "servername, filename, jobsize" pairs to servers
     if sendToServers != b"":
@@ -204,6 +221,7 @@ if __name__ == "__main__":
             if completeFilenames != b"":
                 parseThenSendRequest(
                     completeFilenames, serverSocket, servernames)
+
         except socket.timeout:
             # IMPORTANT: catch timeout exception, DO NOT REMOVE
             pass
