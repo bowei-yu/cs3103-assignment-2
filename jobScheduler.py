@@ -36,6 +36,7 @@ def getCompletedFilename(filename):
     global server_list, server_request_times, num_occupied, job_queue
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
+    print(server_name)
 
     # get response time
     time_taken = (datetime.now() - request_time).total_seconds()
@@ -66,7 +67,8 @@ def getCompletedFilename(filename):
     server_list.sort()
 
     #if len(job_queue) > 0:
-    #    scheduled_request = scheduleJobToServer(server_name, job_queue.pop(0))
+        #scheduled_request = scheduleJobToServer(server_name, job_queue.pop(0))
+        #return scheduled_request
     #else:
     
     print('Completed')
@@ -164,15 +166,17 @@ def parseThenSendRequest(clientData, serverSocket, servernames):
             filename = request.replace("F", "")
             getCompletedFilename(filename)
             if len(job_queue) > 0:
-                request = job_queue.pop()
-                sendToServers = sendToServers + \
-                        assignServerToRequest(servernames, request)
+                request = job_queue.pop(0)
+                assigned_request = assignServerToRequest(servernames, request)
+                if assigned_request is not None:
+                    sendToServers = sendToServers + \
+                            assigned_request
         else:
             # if requests, add "servername" front of the pairs -> "servername, filename, jobsize"
             assigned_request = assignServerToRequest(servernames, request)
             if assigned_request is not None:
                 sendToServers = sendToServers + \
-                        assignServerToRequest(servernames, request)
+                        assigned_request
 
     # send "servername, filename, jobsize" pairs to servers
     if sendToServers != b"":
