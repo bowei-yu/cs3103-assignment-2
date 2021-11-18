@@ -23,16 +23,7 @@ def parseServernames(binaryServernames):
     return binaryServernames.decode().split(',')[:-1]
 
 
-# get the completed file's name, what you want to do?
 def getCompletedFilename(filename):
-    ####################################################
-    #                      TODO                        #
-    # You should use the information on the completed  #
-    # job to update some statistics to drive your      #
-    # scheduling policy. For example, check timestamp, #
-    # or track the number of concurrent files for each #
-    # server?                                          #
-    ####################################################
     global server_list, server_request_times, num_occupied, job_queue
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
@@ -68,23 +59,8 @@ def getCompletedFilename(filename):
     server_list[position][2] = response_time
     server_list.sort()
 
-    #if len(job_queue) > 0:
-        #scheduled_request = scheduleJobToServer(server_name, job_queue.pop(0))
-        #return scheduled_request
-    #else:
-
     print('Completed')
     print(server_list)
-
-    # # Adjust connection weight (cW) = Number of Active Connections x (10000 / Set Weight (sW))
-    # # Adjust time weight (cW) = Response Time x (10000 / Set Weight (sW))
-    # # Blend predictions by averaging out N value, connection_weight, and time weight
-    # for idx, val in enumerate(server_list):
-    #     if server_name in val:
-    #         weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
-    #         server_list[idx][0] = (0.5 * N) + (0.5 * weighted_response_time)
-    #         break
-    # server_list.sort()
 
 
 # formatting: to assign server to the request
@@ -93,18 +69,8 @@ def scheduleJobToServer(servername, request):
 
 # main part you need to do
 def assignServerToRequest(servernames, request):
-    ####################################################
-    #                      TODO                        #
-    # Given the list of servers, which server you want #
-    # to assign this request? You can make decision.   #
-    # You can use a global variables or add more       #
-    # arguments.                                       #
-    ####################################################
     request_name = request.split(",")[0]
     request_size = request.split(",")[1]
-
-    # # Example. just assign the first server
-    # server_to_send = servernames[0]
 
     # Get variables
     global server_list, server_request_times, initial_list, num_occupied, job_queue
@@ -140,9 +106,6 @@ def assignServerToRequest(servernames, request):
         print(initial_list)
         print('Sent')
         print(server_list)
-
-    # Record time of request to server
-    # server_request_times[request_name] = [server_name, datetime.now()]
 
     # Schedule the job
         scheduled_request = scheduleJobToServer(server_to_send, request)
