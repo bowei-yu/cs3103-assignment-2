@@ -23,11 +23,11 @@ def parseServernames(binaryServernames):
     return binaryServernames.decode().split(',')[:-1]
 
 
+# get the completed file's name, what you want to do?
 def getCompletedFilename(filename):
     global server_list, server_request_times, num_occupied, job_queue
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
-    request_size = server_request_times[filename][2]
 
     # get response time
     time_taken = (datetime.now() - request_time).total_seconds()
@@ -49,7 +49,6 @@ def getCompletedFilename(filename):
     active_connections = active_connections - 1
 
     N = response_time * active_connections
-
     weighted_response_time = N * (10000 / ((len(server_list) - (idx + 1) + 1)))
 
     # Update four_tuple in server_list and sort
@@ -57,7 +56,6 @@ def getCompletedFilename(filename):
     server_list[position][1] = active_connections
     server_list[position][2] = response_time
     server_list.sort()
-
 
 # formatting: to assign server to the request
 def scheduleJobToServer(servername, request):
@@ -100,12 +98,11 @@ def assignServerToRequest(servernames, request):
 
     # Schedule the job
         scheduled_request = scheduleJobToServer(server_to_send, request)
-        server_request_times[request_name] = [server_name, datetime.now(), request_size]
+        server_request_times[request_name] = [server_name, datetime.now()]
         return scheduled_request
     else:
         # queue and send later
-        job_queue.append([float(request_size), request_name])
-        job_queue.sort()
+        job_queue.append(request)
         return None
 
 
@@ -124,10 +121,7 @@ def parseThenSendRequest(clientData, serverSocket, servernames):
             getCompletedFilename(filename)
             if len(job_queue) > 0:
                 request = job_queue.pop(0)
-                request_size = str(request[0])
-                request_name = request[1]
-                request_str = request_name + ',' + request_size
-                assigned_request = assignServerToRequest(servernames, request_str)
+                assigned_request = assignServerToRequest(servernames, request)
                 if assigned_request is not None:
                     sendToServers = sendToServers + \
                             assigned_request

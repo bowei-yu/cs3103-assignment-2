@@ -47,8 +47,3 @@ The weighted response time of the server that completed the job is then computed
 After the computation of the weighted response time, we will sort the servers according to their weighted response timings to update the positional rankings of the servers.
 
 Subsequently, for each new job received by the job scheduler, the job scheduler will assign the job to the server with the lowest weighted response time.
-
-</br><b>Optimization of 50th percentile given full knowledge of job sizes</b></br>
-To optimize the 50th percentile performance, the queue for pending jobs is sorted in ascending order of job sizes.
-
-This is done so that a larger quantity of jobs are completed in a shorter period of time to attain a lower 50th percentile timing.
