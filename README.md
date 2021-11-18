@@ -27,7 +27,7 @@ Initially, each server is assigned a weighted response time of 100000. Upon rece
 For each server, the job scheduler keeps track of the server response times, number of active connections, and the weights of the servers.
 
 </br><b>Time to First Byte (TTFB)</b></br>
-Firstly, after a job is completed, the job scheduler calculates the `response time` of the server. This is calculated using the formula - (`Time result is received by job scheduler - Time server is sent a job`).
+Firstly, after a job is completed, the job scheduler calculates the `response time` of the server. This is calculated using the formula `time result is received by job scheduler - ime server is sent a job`.
 
 </br><b>Number of Active Connections</b></br>
 Secondly, in our algorithm, the number of active connections that any server can have is limited to 1. If all of the servers are busy, the job will be stored in a queue. Jobs in the queue will be assigned to servers once they are done with their current job.
@@ -42,7 +42,7 @@ For example, assuming that we have 10 servers, we will assign the server with th
 This is done to weigh the performances of the servers relative to one another.
 
 </br><b>Weighted Response Time</b></br>
-The weighted response time of the server that completed the job is then computed using `response time * active connections * (100000 / (total number of servers - current index of server))`.
+The weighted response time of the server that completed the job is then computed using `response time * active connections * (100000 / (total number of servers - current index position of server in server list))`.
 
 After the computation of the weighted response time, we will sort the servers according to their weighted response timings to update the positional rankings of the servers.
 
