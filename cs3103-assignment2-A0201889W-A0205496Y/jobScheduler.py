@@ -28,7 +28,6 @@ def getCompletedFilename(filename):
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
     request_size = server_request_times[filename][2]
-    print(server_name)
 
     # get response time
     time_taken = (datetime.now() - request_time).total_seconds()
@@ -58,9 +57,6 @@ def getCompletedFilename(filename):
     server_list[position][1] = active_connections
     server_list[position][2] = response_time
     server_list.sort()
-
-    print('Completed')
-    print(server_list)
 
 
 # formatting: to assign server to the request
@@ -101,11 +97,6 @@ def assignServerToRequest(servernames, request):
                     server_list[idx][0] = weighted_response_time
                 break
         server_list.sort()
-
-        print('Initial list')
-        print(initial_list)
-        print('Sent')
-        print(server_list)
 
     # Schedule the job
         scheduled_request = scheduleJobToServer(server_to_send, request)
