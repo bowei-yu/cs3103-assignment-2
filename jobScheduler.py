@@ -28,7 +28,6 @@ def getCompletedFilename(filename):
     server_name = server_request_times[filename][0]
     request_time = server_request_times[filename][1]
     request_size = server_request_times[filename][2]
-    print(server_name)
 
     # get response time
     time_taken = (datetime.now() - request_time).total_seconds()
