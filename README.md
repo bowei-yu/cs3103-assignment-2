@@ -1,5 +1,5 @@
 # CS3103 Assignment 2 - Job Scheduling (Language - Python 3)
-### Done by: Wong Jun Long (A0201889W) and Yu Bowei (A0205496Y)
+### Done by: Wong Jun Long and Yu Bowei
 
 </br>
 
